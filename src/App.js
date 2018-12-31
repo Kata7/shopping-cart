@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
-
+// Note: selection = document.querySelector('selection dropdown')
+// Note: selection.selectedOptions is an array
+// Note: selection.selectedOptions[0] is the first (and only unless multi-select) option
+// Note: selection.selectedOptions[0].id will give you corresponding product id
 
 class App extends Component {
   state =
@@ -16,7 +19,7 @@ class App extends Component {
       { id: 48, name: 'Awesome Leather Shoes', priceInCents: 3990 },
     ]
   }
-  
+
   render() {
 
     let cartItemsList = 
@@ -30,6 +33,7 @@ class App extends Component {
       <div className="App">
         <CartHeader />
         <CartItems list={cartItemsList}/>
+        <Form list={this.state.products}/>
         <CartFooter copyright="2018"/>
       </div>
     );
@@ -42,6 +46,12 @@ const CartItems = ({list}) => {
       <CartItem key={item.id} product={item.product} name={item.product.name} priceInCents={item.product.priceInCents} quantity={item.quantity} />
     )
   })
+  console.log(list)
+  let total = list.reduce((acc, item) => {
+    return acc + item.product.priceInCents
+  }, 0)
+  total = (total/100).toFixed(2)
+
   return (
     <div className="container">
       <h1>Cart Items</h1>
@@ -55,6 +65,14 @@ const CartItems = ({list}) => {
         </div>
         
         {cartItemsList}
+
+        <div className="list-group-item">
+          <div className="row">
+            <div className="col-sm-8">Total Cost</div>
+            <div className="col-sm-2">${total}</div>
+            <div className="col-sm-2"></div>
+          </div>
+        </div>
         
       </div>
     </div>
@@ -66,12 +84,47 @@ const CartItem = ({product, name, priceInCents, quantity}) => {
     <div className="list-group-item">
       <div className="row">
         <div className="col-sm-8">{name}</div>
-        <div className="col-sm-2">{priceInCents}</div>
+        <div className="col-sm-2">${(priceInCents / 100).toFixed(2)}</div>
         <div className="col-sm-2">{quantity}</div>
       </div>
     </div>
   )
 
+}
+
+const Form = ({list}) => {
+  console.log(list)
+  let formOptions = list.map((item, index) => {
+    return (
+      <FormOption key={index} product={item}/>
+    )
+  })
+
+  return (
+    <div className="container">
+      <form>
+        <div className="form-group">
+          <label htmlFor="quantityInput">Quantity</label>
+          <input type="number" className="form-control" id="quantityInput" placeholder="Enter the # of items" min="1"></input>
+        </div>
+        <div className="form-group">
+          <label htmlFor="productInput">Products</label>
+          <select className="form-control">
+            <option disabled>Please Select an Item</option>
+            {formOptions}
+          </select>
+        </div>
+        <button type="submit" className="btn btn-primary">Add Item</button>
+
+      </form>
+    </div>
+  )
+}
+
+const FormOption = ({product}) => {
+  return(
+    <option value={product.name} id={product.id}>{product.name}  -  -  -  ${(product.priceInCents / 100).toFixed(2)}</option>
+  )
 }
 
 const CartHeader = () => {
