@@ -26,7 +26,6 @@ class App extends Component {
     
   }
 
-  
 
   addItem = (e) => {
     e.preventDefault()
@@ -77,7 +76,7 @@ const CartItems = ({list}) => {
   })
   console.log(list)
   let total = list.reduce((acc, item) => {
-    return acc + item.product.priceInCents
+    return acc + item.product.priceInCents * item.quantity
   }, 0)
   total = (total/100).toFixed(2)
 
