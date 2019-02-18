@@ -68,7 +68,7 @@ class App extends Component {
   }
 }
 
-const CartItems = ({list}) => {
+const CartItems = ({list = []}) => {
   let cartItemsList = list.map((item) => {
     return (
       <CartItem key={item.id} product={item.product} name={item.product.name} priceInCents={item.product.priceInCents} quantity={item.quantity} />
@@ -107,7 +107,7 @@ const CartItems = ({list}) => {
   )
 }
 
-const CartItem = ({product, name, priceInCents, quantity}) => {
+const CartItem = ({name, priceInCents, quantity}) => {
   return (
     <div className="list-group-item">
       <div className="row">
