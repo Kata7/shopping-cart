@@ -1,8 +1,4 @@
 import React, { Component } from 'react';
-// Note: selection = document.querySelector('selection dropdown')
-// Note: selection.selectedOptions is an array
-// Note: selection.selectedOptions[0] is the first (and only unless multi-select) option
-// Note: selection.selectedOptions[0].id will give you corresponding product id
 
 class App extends Component {
   state =
@@ -18,51 +14,77 @@ class App extends Component {
       { id: 47, name: 'Ergonomic Bronze Lamp', priceInCents: 40000 },
       { id: 48, name: 'Awesome Leather Shoes', priceInCents: 3990 },
     ],
-    cartItemsList: [
-      {id: 1, product: {id: 40, name: 'Mediocre Iron Watch', priceInCents: 399}, quantity: 1},
-      {id: 2, product: {id: 41, name: 'Heavy Duty Concrete Plate', priceInCents: 499}, quantity: 2},
-      {id: 3, product: {id: 42, name: 'Intelligent Paper Knife', priceInCents: 1999}, quantity: 1}
-    ]
+    cartItemsList: [],
+    item: {},
+    amount: 0,
+    currentID: 0
     
+  }
+
+  changeQuantity = (updatedQuantity) => {
+    this.setState(
+      {
+        amount: updatedQuantity
+      }
+    )
+  }
+
+  changeItem = (updatedItem) => {
+    let newProduct = {}
+    this.state.products.forEach(item => {
+      if (item.name === updatedItem) {
+        newProduct = item
+      }
+    })
+    this.setState(
+      {
+        item: newProduct
+      }
+    )
   }
 
 
   addItem = (e) => {
     e.preventDefault()
 
-    const productInput = document.querySelector('#productInput')
-    const product = productInput.selectedOptions[0]
-    const productID = Number(product.id)
-
-    const amountInput = document.querySelector('#quantityInput')
-    const amount = Number(amountInput.value)
+    const amount = this.state.amount
+    const item = this.state.item
+    const ID = this.state.currentID
 
     let appendObject = {}
 
-    if (amount && product.id) {
-      let productReference = this.state.products.filter(x => x.id === productID)[0]
-      appendObject =
-      {
-        id: this.state.cartItemsList.length,
-        product: productReference,
+    if (amount !== 0 && item !== {}) {
+      appendObject = {
+        id: ID,
+        product: item,
         quantity: amount
       }
-    }
-    console.log(appendObject)
-    this.setState((prevState) => ({cartItemsList: this.state.cartItemsList.concat(appendObject)}))
-    
+      this.setState(
+        {
+          currentID: this.state.currentID + 1,
+          cartItemsList: this.state.cartItemsList.concat(appendObject)
+        }
+      )
+    }   
   }
 
   render() {
-
-
-
     return (
       <div className="App">
-        <CartHeader />
-        <CartItems list={this.state.cartItemsList}/>
-        <Form list={this.state.products} addItem={this.addItem}/>
-        <CartFooter copyright="2018"/>
+        <CartHeader
+        />
+        <CartItems 
+          list={this.state.cartItemsList}
+        />
+        <Form 
+          list={this.state.products}
+          addItem={this.addItem}
+          changeQuantity={this.changeQuantity}
+          changeItem={this.changeItem}
+        />
+        <CartFooter
+          copyright="2018"
+        />
       </div>
     );
   }
@@ -71,10 +93,15 @@ class App extends Component {
 const CartItems = ({list = []}) => {
   let cartItemsList = list.map((item) => {
     return (
-      <CartItem key={item.id} product={item.product} name={item.product.name} priceInCents={item.product.priceInCents} quantity={item.quantity} />
+      <CartItem 
+        key={item.id}
+        product={item.product}
+        name={item.product.name}
+        priceInCents={item.product.priceInCents}
+        quantity={item.quantity}
+      />
     )
   })
-  console.log(list)
   let total = list.reduce((acc, item) => {
     return acc + item.product.priceInCents * item.quantity
   }, 0)
@@ -120,10 +147,13 @@ const CartItem = ({name, priceInCents, quantity}) => {
 
 }
 
-const Form = ({list, addItem}) => {
+const Form = ({list, addItem, changeQuantity, changeItem}) => {
   let formOptions = list.map((item, index) => {
     return (
-      <FormOption key={index} product={item}/>
+      <FormOption 
+        key={index}
+        product={item}
+      />
     )
   })
 
@@ -132,11 +162,11 @@ const Form = ({list, addItem}) => {
       <form onSubmit={addItem}>
         <div className="form-group">
           <label htmlFor="quantityInput">Quantity</label>
-          <input type="number" className="form-control" id="quantityInput" placeholder="Enter the # of items" min="1"></input>
+          <input type="number" className="form-control" id="quantityInput" placeholder="Enter the # of items" min="1" onChange={(e) => changeQuantity(e.target.value)}></input>
         </div>
         <div className="form-group">
           <label htmlFor="productInput">Products</label>
-          <select className="form-control" id="productInput" defaultValue="Please Select an Item">
+          <select className="form-control" id="productInput" defaultValue="Please Select an Item" onChange={(e) => changeItem(e.target.value)}>
             <option disabled>Please Select an Item</option>
 
             {formOptions}
@@ -152,14 +182,20 @@ const Form = ({list, addItem}) => {
 
 const FormOption = ({product}) => {
   return(
-    <option value={product.name} id={product.id}>{product.name}  -  -  -  ${(product.priceInCents / 100).toFixed(2)}</option>
+    <option 
+      product ={product}
+      value={product.name}
+      id={product.id}
+    >
+      {product.name}  -  -  -  ${(product.priceInCents / 100).toFixed(2)}
+    </option>
   )
 }
 
 const CartHeader = () => {
   return (
     <nav className="navbar navbar-dark bg-primary">
-      <a className="navbar-brand" href="#">Shopping Cart</a>
+      <a className="navbar-brand" href="/#">Shopping Cart</a>
     </nav>
   )
 }
@@ -167,7 +203,7 @@ const CartHeader = () => {
 const CartFooter = ({copyright}) => {
   return (
     <nav className="navbar navbar-dark bg-dark">
-      <a className="navbar-brand" href="#">&copy; {copyright}</a>
+      <a className="navbar-brand" href="/#">&copy; {copyright}</a>
     </nav>
   )
 }
